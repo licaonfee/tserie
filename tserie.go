@@ -35,6 +35,7 @@ func Normal(std, mean float64) func(time.Time) float64 {
 
 // TimeIterator generates datapoints in the same way as MakeTS but is suitable for big datasets
 type TimeIterator struct {
+	init  bool
 	start time.Time
 	stop  time.Time
 	step  time.Duration
@@ -44,13 +45,21 @@ type TimeIterator struct {
 
 // Next returns true while current time is before stop
 func (it *TimeIterator) Next() bool {
-	if !it.curr.Time.Before(it.stop) {
+	if !it.init {
+		it.curr = Point{
+			Time:  it.start,
+			Value: it.gen(it.start),
+		}
+		it.init = true
+		return true
+	}
+	next := it.curr.Time.Add(it.step)
+	if next.After(it.stop) {
 		return false
 	}
-	t := it.curr.Time.Add(it.step)
 	it.curr = Point{
-		Time:  t,
-		Value: it.gen(t),
+		Time:  next,
+		Value: it.gen(next),
 	}
 	return true
 }
@@ -62,10 +71,12 @@ func (it *TimeIterator) Item() Point {
 
 // NewTimeIterator creates a new TimeIterator
 func NewTimeIterator(start, stop time.Time, step time.Duration, gen func(time.Time) float64) *TimeIterator {
-	return &TimeIterator{
+	it := &TimeIterator{
 		start: start,
 		stop:  stop,
 		step:  step,
 		gen:   gen,
 	}
+	it.Next()
+	return it
 }
