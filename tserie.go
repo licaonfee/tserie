@@ -1,6 +1,7 @@
 package tserie
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -79,4 +80,14 @@ func NewTimeIterator(start, stop time.Time, step time.Duration, gen func(time.Ti
 	}
 	it.Next()
 	return it
+}
+
+// Sine as y = amplitude*sin(bx)+vshift
+func Sine(period time.Duration, amplitude, vshift float64) func(time.Time) float64 {
+	periodf := float64(period)
+	freq := (2 * math.Pi) / periodf
+	return func(t time.Time) float64 {
+		relTime := t.Sub(t.Truncate(period))
+		return amplitude*math.Sin(freq*float64(relTime)) + vshift
+	}
 }
