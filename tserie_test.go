@@ -44,6 +44,45 @@ func TestMakeTS(t *testing.T) {
 
 }
 
+func TestTimeIterator(t *testing.T) {
+	tests := map[string]struct {
+		start    time.Time
+		stop     time.Time
+		step     time.Duration
+		getValue func(time.Time) float64
+		want     []tserie.Point
+	}{
+		"hourly": {
+			start:    time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			stop:     time.Date(2022, 1, 1, 0, 59, 59, 0, time.UTC),
+			step:     10 * time.Minute,
+			getValue: func(t time.Time) float64 { return 0.6 },
+			want: []tserie.Point{
+				{Time: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC), Value: 0.6},
+				{Time: time.Date(2022, 1, 1, 0, 10, 0, 0, time.UTC), Value: 0.6},
+				{Time: time.Date(2022, 1, 1, 0, 20, 0, 0, time.UTC), Value: 0.6},
+				{Time: time.Date(2022, 1, 1, 0, 30, 0, 0, time.UTC), Value: 0.6},
+				{Time: time.Date(2022, 1, 1, 0, 40, 0, 0, time.UTC), Value: 0.6},
+				{Time: time.Date(2022, 1, 1, 0, 50, 0, 0, time.UTC), Value: 0.6},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts := tserie.NewTimeIterator(tt.start, tt.stop, tt.step, tt.getValue)
+			var got []tserie.Point
+			for ts.Next() {
+				got = append(got, ts.Item())
+			}
+			if !equalSerie(got, tt.want) {
+				t.Errorf("Iterator got %v , want %v", got, tt.want)
+			}
+		})
+	}
+
+}
+
 // test if a serie is equal to another, with precision of nanoseconds
 func equalSerie(a, b []tserie.Point) bool {
 	if a == nil && b == nil || len(a) == 0 && len(b) == 0 {

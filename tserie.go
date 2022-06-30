@@ -16,7 +16,7 @@ type Point struct {
 func MakeTS(start, stop time.Time, step time.Duration, getValue func(time.Time) float64) []Point {
 	r := stop.Sub(start) / step
 	ts := make([]Point, 0, int(r))
-	for t := start; t.Before(stop); t = t.Add(step) {
+	for t := start; !t.After(stop); t = t.Add(step) {
 		p := Point{
 			Time:  t,
 			Value: getValue(t),
@@ -78,7 +78,6 @@ func NewTimeIterator(start, stop time.Time, step time.Duration, gen func(time.Ti
 		step:  step,
 		gen:   gen,
 	}
-	it.Next()
 	return it
 }
 
