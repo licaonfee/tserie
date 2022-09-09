@@ -2,6 +2,8 @@
 
 Time Series data generator
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/licaonfee/tserie.svg)](https://pkg.go.dev/github.com/licaonfee/tserie)
+
 Example
 
 ```go
