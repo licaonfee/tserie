@@ -1,3 +1,4 @@
+// Package tserie generate time series data
 package tserie
 
 import (
@@ -65,7 +66,7 @@ func (it *TimeIterator) Next() bool {
 	return true
 }
 
-//  Item returns the current data point
+// Item returns the current data point
 func (it *TimeIterator) Item() Point {
 	return it.curr
 }
@@ -88,5 +89,20 @@ func Sine(period time.Duration, amplitude, vshift float64) func(time.Time) float
 	return func(t time.Time) float64 {
 		relTime := t.Sub(t.Truncate(period))
 		return amplitude*math.Sin(freq*float64(relTime)) + vshift
+	}
+}
+
+// Sin as y = amplitude*sin(frequency * relativeTime)+vshift
+func Sin(period time.Duration, amplitude, vshift float64) func(time.Time) float64 {
+	return Sine(period, amplitude, vshift)
+}
+
+// Cos as y = amplitude*sin(frequency * relativeTime)+vshift
+func Cos(period time.Duration, amplitude, vshift float64) func(time.Time) float64 {
+	periodf := float64(period)
+	freq := (2 * math.Pi) / periodf
+	return func(t time.Time) float64 {
+		relTime := t.Sub(t.Truncate(period))
+		return amplitude*math.Cos(freq*float64(relTime)) + vshift
 	}
 }
